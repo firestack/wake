@@ -1,0 +1,8 @@
+[package]
+name = "wake"
+version = "0.1.0"
+authors = ["Kayla Firestack <me@stackfire.io>"]
+edition = "2018"
+
+[dependencies]
+wakey = { version="^1", path="../wakey" }
