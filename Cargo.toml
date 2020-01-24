@@ -6,3 +6,4 @@ edition = "2018"
 
 [dependencies]
 wakey = { version="^1", path="../wakey" }
+structopt = "0.2.18"
