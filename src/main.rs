@@ -39,7 +39,6 @@ impl std::convert::From<wakey::Error> for Error {
 
 fn main() -> Result<()> {
     let args = Opt::from_args();
-    dbg!(&args);
     // I'd make this const but all the functions are ctypes
     // and are not const compatable so I can't declare a IP address
     // in code as const
