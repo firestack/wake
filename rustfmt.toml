@@ -1,0 +1,6 @@
+# blank_lines_lower_bound = 1
+hard_tabs = true
+merge_imports = true
+imports_layout = "HorizontalVertical"
+newline_style = "Unix"
+normalize_doc_attributes = true

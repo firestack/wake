@@ -5,5 +5,5 @@ authors = ["Kayla Firestack <me@stackfire.io>"]
 edition = "2018"
 
 [dependencies]
-wakey = { version="^1", path="../wakey" }
+wakey = { git="https://github.com/firestack/wakey.git" }
 structopt = "0.2.18"
