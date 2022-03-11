@@ -1,30 +1,29 @@
 use std::net::SocketAddr;
-use structopt::StructOpt;
 use wakey::WolPacket;
 
 type Result<T> = std::result::Result<T, Error>;
 
-#[derive(StructOpt, Debug)]
-#[structopt(name = "MAC")]
+#[derive(clap::Parser, Debug)]
+#[clap(name = "Wake")]
 struct Opt {
-	#[structopt(short = "n", long = "num_packets", default_value = "10")]
+	#[clap(short = 'n', long = "num_packets", default_value = "10")]
 	number_of_packets: usize,
 
-	#[structopt(short = "d", long = "destination", default_value = "255.255.255.255:9")]
+	#[clap(short = 'd', long = "destination", default_value = "255.255.255.255:9")]
 	destination: SocketAddr,
 
-	#[structopt(name = "MAC", min_values = 1, required = true)]
+	#[clap(name = "MAC", min_values = 1, required = true)]
 	mac: Vec<String>,
 
-	#[structopt(
-		short = "s",
-		short = "src",
+	#[clap(
+		short = 's',
+		long = "src",
 		long = "source",
 		default_value = "0.0.0.0:0"
 	)]
 	source: SocketAddr,
 
-	#[structopt(short = "v", parse(from_occurrences), required = false)]
+	#[clap(short = 'v', parse(from_occurrences), required = false)]
 	pub verbosity: usize,
 }
 
@@ -41,13 +40,13 @@ impl std::convert::From<wakey::Error> for Error {
 }
 
 fn main() -> Result<()> {
-	let args = Opt::from_args();
+	let args: Opt = clap::Parser::parse();
 	// I'd make this const but all the functions are ctypes
 	// and are not const compatable so I can't declare a IP address
 	// in code as const
 	for mac_addr in &args.mac {
 		let (name, mac) = match mac_addr
-			.find("=")
+			.find('=')
 			.map(|eq_index| mac_addr.split_at(eq_index))
 		{
 			Some((name, mac)) => (Some(name), mac.trim_start_matches('=')),
