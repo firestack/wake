@@ -1,9 +1,12 @@
 use std::net::SocketAddr;
+
+use clap::{Parser, ArgAction};
+
 use wakey::WolPacket;
 
 type Result<T> = std::result::Result<T, Error>;
 
-#[derive(clap::Parser, Debug)]
+#[derive(Parser, Debug)]
 #[clap(name = "Wake")]
 struct Opt {
 	#[clap(short = 'n', long = "num_packets", default_value = "10")]
@@ -12,7 +15,7 @@ struct Opt {
 	#[clap(short = 'd', long = "destination", default_value = "255.255.255.255:9")]
 	destination: SocketAddr,
 
-	#[clap(name = "MAC", min_values = 1, required = true)]
+	#[clap(name = "MAC", num_args = 1, required = true)]
 	mac: Vec<String>,
 
 	#[clap(
@@ -23,7 +26,7 @@ struct Opt {
 	)]
 	source: SocketAddr,
 
-	#[clap(short = 'v', parse(from_occurrences), required = false)]
+	#[clap(short = 'v', action = ArgAction::Count, required = false)]
 	pub verbosity: usize,
 }
 
@@ -40,7 +43,7 @@ impl std::convert::From<wakey::Error> for Error {
 }
 
 fn main() -> Result<()> {
-	let args: Opt = clap::Parser::parse();
+	let args: Opt = Parser::parse();
 	// I'd make this const but all the functions are ctypes
 	// and are not const compatable so I can't declare a IP address
 	// in code as const

@@ -1,87 +1,88 @@
 {
-  description = "Build a cargo project";
+	description = "Build a cargo project";
 
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+	inputs = {
+		nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
-    crane = {
-      url = "github:ipetkov/crane";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+		crane = {
+			url = "github:ipetkov/crane";
+			inputs.nixpkgs.follows = "nixpkgs";
+			inputs.flake-utils.follows = "flake-utils";
+		};
 
-    flake-utils = {
-      url = "github:numtide/flake-utils";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-  };
+		flake-utils = {
+			url = "github:numtide/flake-utils";
+		};
 
-  outputs = { self, nixpkgs, crane, flake-utils, ... }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let
-        pkgs = import nixpkgs {
-          inherit system;
-        };
+		rust-overlay = {
+			url = "github:oxalica/rust-overlay";
+			inputs = {
+				nixpkgs.follows = "nixpkgs";
+				flake-utils.follows = "flake-utils";
+			};
+		};
+	};
 
-        craneLib = crane.lib.${system};
-        src = ./.;
+	outputs = { self, nixpkgs, crane, flake-utils, rust-overlay, ... }:
+		flake-utils.lib.eachDefaultSystem (system:
+			let
+				pkgs = import nixpkgs {
+					inherit system;
+					overlays = [ (import rust-overlay) ];
+				};
 
-        # Build *just* the cargo dependencies, so we can reuse
-        # all of that work (e.g. via cachix) when running in CI
-        cargoArtifacts = craneLib.buildDepsOnly {
-          inherit src;
-        };
+				craneLib = (crane.mkLib pkgs).overrideToolchain pkgs.rust-bin.stable.latest.default;
+				src = self;
 
-        # Build the actual crate itself, reusing the dependency
-        # artifacts from above.
-        wake = craneLib.buildPackage {
-          inherit cargoArtifacts src;
-        };
-      in
-      {
-        checks = {
-          # Build the crate as part of `nix flake check` for convenience
-          inherit wake;
+				# Build *just* the cargo dependencies, so we can reuse
+				# all of that work (e.g. via cachix) when running in CI
+				cargoArtifacts = craneLib.buildDepsOnly {
+					inherit src;
+				};
 
-          # Run clippy (and deny all warnings) on the crate source,
-          # again, resuing the dependency artifacts from above.
-          #
-          # Note that this is done as a separate derivation so that
-          # we can block the CI if there are issues here, but not
-          # prevent downstream consumers from building our crate by itself.
-          wake-clippy = craneLib.cargoClippy {
-            inherit cargoArtifacts src;
-            cargoClippyExtraArgs = "-- --deny warnings";
-          };
+				# Build the actual crate itself, reusing the dependency
+				# artifacts from above.
+				wake = craneLib.buildPackage {
+					inherit cargoArtifacts src;
+				};
+			in
+			{
+				checks = {
+					# Build the crate as part of `nix flake check` for convenience
+					inherit wake;
 
-          # Check formatting
-          wake-fmt = craneLib.cargoFmt {
-            inherit src;
-          };
+					# Run clippy (and deny all warnings) on the crate source,
+					# again, resuing the dependency artifacts from above.
+					#
+					# Note that this is done as a separate derivation so that
+					# we can block the CI if there are issues here, but not
+					# prevent downstream consumers from building our crate by itself.
+					wake-clippy = craneLib.cargoClippy {
+						inherit cargoArtifacts src;
+						cargoClippyExtraArgs = "-- --deny warnings";
+					};
 
-          # Check code coverage (note: this will not upload coverage anywhere)
-          wake-coverage = craneLib.cargoTarpaulin {
-            inherit cargoArtifacts src;
-          };
-        };
+					# Check formatting
+					wake-fmt = craneLib.cargoFmt {
+						inherit src;
+					};
 
-        defaultPackage = wake;
-        packages.wake = wake;
+					# Check code coverage (note: this will not upload coverage anywhere)
+					wake-coverage = craneLib.cargoTarpaulin {
+						inherit cargoArtifacts src;
+					};
+				};
 
-        apps.my-app = flake-utils.lib.mkApp {
-          drv = wake;
-        };
-        defaultApp = self.apps.${system}.my-app;
+				defaultPackage = wake;
+				packages.wake = wake;
 
-        devShell = pkgs.mkShell {
-          inputsFrom = builtins.attrValues self.checks;
+				apps.my-app = flake-utils.lib.mkApp {
+					drv = wake;
+				};
+				defaultApp = self.apps.${system}.my-app;
 
-          # Extra inputs can be added here
-          nativeBuildInputs = with pkgs; [
-            cargo
-						cargo-edit
-						rustfmt
-            rustc
-          ];
-        };
-      });
+				devShell = craneLib.devShell {
+					checks = self.checks.${system};
+				};
+			});
 }
