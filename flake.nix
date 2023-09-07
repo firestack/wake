@@ -81,16 +81,8 @@
 				};
 				defaultApp = self.apps.${system}.my-app;
 
-				devShell = pkgs.mkShell {
-					inputsFrom = builtins.attrValues self.checks;
-
-					# Extra inputs can be added here
-					nativeBuildInputs = with pkgs; [
-						cargo
-						cargo-edit
-						rustfmt
-						rustc
-					];
+				devShell = craneLib.devShell {
+					checks = self.checks.${system};
 				};
 			});
 }
