@@ -6,5 +6,18 @@
 
 	"nix": {
 		"enabled": true
-	}
+	},
+
+	"lockFileMaintenance": {
+		"enabled": false,
+		"recreateWhen": "always",
+		"rebaseStalePrs": true,
+		"branchTopic": "lock-file-maintenance",
+		"commitMessageAction": "Lock file maintenance",
+		"commitMessageTopic": null,
+		"commitMessageExtra": null,
+		"schedule": ["before 4am on monday"],
+		"groupName": null,
+		"prBodyDefinitions": {"Change": "All locks refreshed"}
+	 }
 }
