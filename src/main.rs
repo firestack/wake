@@ -1,6 +1,6 @@
 use std::net::SocketAddr;
 
-use clap::{Parser, ArgAction};
+use clap::{ArgAction, Parser};
 
 use wakey::WolPacket;
 
