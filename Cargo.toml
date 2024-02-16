@@ -6,6 +6,6 @@ edition = "2021"
 
 [dependencies]
 wakey = { git="https://github.com/firestack/wakey.git" }
-clap = { version = "4.5.0", features = ["derive"] }
+clap = { version = "4.5.1", features = ["derive"] }
 
 [features]
