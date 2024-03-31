@@ -7,7 +7,6 @@
 		crane = {
 			url = "github:ipetkov/crane";
 			inputs.nixpkgs.follows = "nixpkgs";
-			inputs.flake-utils.follows = "flake-utils";
 		};
 
 		flake-utils = {
