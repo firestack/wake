@@ -27,7 +27,7 @@ struct Opt {
 	source: SocketAddr,
 
 	#[clap(short = 'v', action = ArgAction::Count, required = false)]
-	pub verbosity: usize,
+	pub(crate) verbosity: usize,
 }
 
 fn main() -> Result<()> {
