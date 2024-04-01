@@ -5,7 +5,7 @@ authors = ["Kayla Firestack <me@stackfire.io>"]
 edition = "2021"
 
 [dependencies]
-wakey = { git="https://github.com/firestack/wakey.git" }
 clap = { version = "4.5.3", features = ["derive"] }
+wakey = "0.3.0"
 
 [features]
