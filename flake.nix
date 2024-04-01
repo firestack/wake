@@ -7,7 +7,6 @@
 		crane = {
 			url = "github:ipetkov/crane";
 			inputs.nixpkgs.follows = "nixpkgs";
-			inputs.flake-utils.follows = "flake-utils";
 		};
 
 		flake-utils = {
@@ -65,11 +64,6 @@
 					# Check formatting
 					wake-fmt = craneLib.cargoFmt {
 						inherit src;
-					};
-
-					# Check code coverage (note: this will not upload coverage anywhere)
-					wake-coverage = craneLib.cargoTarpaulin {
-						inherit cargoArtifacts src;
 					};
 				};
 

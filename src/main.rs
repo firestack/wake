@@ -4,7 +4,7 @@ use clap::{ArgAction, Parser};
 
 use wakey::WolPacket;
 
-type Result<T> = std::result::Result<T, Error>;
+type Result<T, E = Box<dyn std::error::Error + Send + Sync + 'static>> = core::result::Result<T, E>;
 
 #[derive(Parser, Debug)]
 #[clap(name = "Wake")]
@@ -28,18 +28,6 @@ struct Opt {
 
 	#[clap(short = 'v', action = ArgAction::Count, required = false)]
 	pub verbosity: usize,
-}
-
-#[derive(Debug)]
-enum Error {
-	// MissingArgument,
-	Wakey(wakey::Error), // BadFormat
-}
-
-impl std::convert::From<wakey::Error> for Error {
-	fn from(error: wakey::Error) -> Self {
-		Error::Wakey(error)
-	}
 }
 
 fn main() -> Result<()> {
@@ -76,10 +64,10 @@ fn send_packets(mac: &str, computer_name: Option<&str>, args: &Opt) -> Result<()
 
 	let interval = print_interval(args.verbosity, args.number_of_packets);
 	for n in 0..args.number_of_packets {
-		let res = wol.send_magic_to(args.source, args.destination)?;
+		wol.send_magic_to(args.source, args.destination)?;
 
 		if ((n + 1) % interval) == 0 || (n + 1) == args.number_of_packets {
-			print!("{:>6}: Sent packet ({} bytes)\r", n + 1, res);
+			print!("{:>6}: Sent packet\r", n + 1);
 		}
 	}
 	println!();
